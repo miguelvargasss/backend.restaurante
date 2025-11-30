@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Backend.Restaurant.Migrations
 {
     [DbContext(typeof(AppData))]
-    [Migration("20251124214907_InitialMigration")]
-    partial class InitialMigration
+    [Migration("20251130052554_Migracion1")]
+    partial class Migracion1
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -118,8 +118,8 @@ namespace Backend.Restaurant.Migrations
                         .HasColumnType("character varying(100)");
 
                     b.Property<string>("ContactPhone")
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)");
+                        .HasMaxLength(9)
+                        .HasColumnType("character varying(9)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -586,8 +586,8 @@ namespace Backend.Restaurant.Migrations
 
                     b.Property<string>("PhoneReserve")
                         .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)");
+                        .HasMaxLength(9)
+                        .HasColumnType("character varying(9)");
 
                     b.Property<DateTime>("ReservationDate")
                         .HasColumnType("timestamp with time zone");
@@ -887,7 +887,7 @@ namespace Backend.Restaurant.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean");
 
-                    b.Property<DateTime>("LastLogin")
+                    b.Property<DateTime?>("LastLogin")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("LastNameUser")
@@ -904,10 +904,6 @@ namespace Backend.Restaurant.Migrations
                         .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)");
-
-                    b.Property<string>("PhoneNumber")
-                        .HasMaxLength(9)
-                        .HasColumnType("character varying(9)");
 
                     b.Property<int?>("ProfilId")
                         .HasColumnType("integer");
@@ -958,8 +954,8 @@ namespace Backend.Restaurant.Migrations
 
                     b.Property<string>("PhoneWorker")
                         .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)");
+                        .HasMaxLength(9)
+                        .HasColumnType("character varying(9)");
 
                     b.Property<decimal>("SalaryWorker")
                         .HasPrecision(18, 2)

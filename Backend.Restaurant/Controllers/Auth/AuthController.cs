@@ -215,5 +215,62 @@ namespace Backend.Restaurant.Controllers.Auth
                 hashPreview = user.PasswordHash.Substring(0, 29) + "..."
             });
         }
+
+        [HttpPost("initialize")]
+        [AllowAnonymous]
+        public async Task<IActionResult> Initialize([FromBody] InitializeDto initDto)
+        {
+            // Verificar que no existan datos previos
+            if (await _context.Profils.AnyAsync() || await _context.Users.AnyAsync())
+            {
+                return BadRequest(new { message = "El sistema ya está inicializado. Ya existen perfiles o usuarios en la base de datos." });
+            }
+
+            // Crear perfil
+            var profil = new Models.Profil
+            {
+                NameProfil = initDto.ProfileName,
+                DescriptionProfil = initDto.ProfileDescription,
+                HasAdminAccess = true,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            _context.Profils.Add(profil);
+            await _context.SaveChangesAsync();
+
+            // Crear usuario
+            var user = new Models.User
+            {
+                NameUser = initDto.UserName,
+                LastNameUser = initDto.UserLastName,
+                Email = initDto.Email,
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(initDto.Password),
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow,
+                ProfilId = profil.Id
+            };
+
+            _context.Users.Add(user);
+            await _context.SaveChangesAsync();
+
+            return Ok(new 
+            { 
+                message = "Sistema inicializado exitosamente",
+                profile = new 
+                { 
+                    id = profil.Id, 
+                    name = profil.NameProfil,
+                    hasAdminAccess = profil.HasAdminAccess
+                },
+                user = new 
+                { 
+                    id = user.Id, 
+                    email = user.Email, 
+                    name = user.NameUser,
+                    lastName = user.LastNameUser
+                }
+            });
+        }
     }
 }

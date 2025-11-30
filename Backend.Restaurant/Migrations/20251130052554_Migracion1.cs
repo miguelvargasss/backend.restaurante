@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Backend.Restaurant.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialMigration : Migration
+    public partial class Migracion1 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -40,7 +40,7 @@ namespace Backend.Restaurant.Migrations
                     ClaimDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     Status = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
                     ContactEmail = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
-                    ContactPhone = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: true),
+                    ContactPhone = table.Column<string>(type: "character varying(9)", maxLength: 9, nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     IsActive = table.Column<bool>(type: "boolean", nullable: false)
@@ -151,7 +151,7 @@ namespace Backend.Restaurant.Migrations
                     NameWorker = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     LastNameWorker = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     DNI = table.Column<int>(type: "integer", nullable: false),
-                    PhoneWorker = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
+                    PhoneWorker = table.Column<string>(type: "character varying(9)", maxLength: 9, nullable: false),
                     EmailWorker = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
                     SalaryWorker = table.Column<decimal>(type: "numeric(18,2)", precision: 18, scale: 2, nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
@@ -224,8 +224,7 @@ namespace Backend.Restaurant.Migrations
                     LastNameUser = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     Email = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     PasswordHash = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
-                    PhoneNumber = table.Column<string>(type: "character varying(9)", maxLength: 9, nullable: true),
-                    LastLogin = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    LastLogin = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     ProfilId = table.Column<int>(type: "integer", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
@@ -304,7 +303,7 @@ namespace Backend.Restaurant.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     NameUserReserve = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
-                    PhoneReserve = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
+                    PhoneReserve = table.Column<string>(type: "character varying(9)", maxLength: 9, nullable: false),
                     NumberPeople = table.Column<int>(type: "integer", nullable: false),
                     AdvancePayment = table.Column<bool>(type: "boolean", nullable: true),
                     Amount = table.Column<decimal>(type: "numeric(18,2)", precision: 18, scale: 2, nullable: false),

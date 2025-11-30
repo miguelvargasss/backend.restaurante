@@ -24,8 +24,7 @@ namespace Backend.Restaurant.Controllers.Registers.Feedback
             [FromQuery] int page = 1,
             [FromQuery] int pageSize = 10,
             [FromQuery] string? search = null,
-            [FromQuery] bool? isActive = null,
-            [FromQuery] string? status = null)
+            [FromQuery] bool? isActive = null)
         {
             if (page < 1) page = 1;
             if (pageSize < 1 || pageSize > 100) pageSize = 10;
@@ -37,18 +36,12 @@ namespace Backend.Restaurant.Controllers.Registers.Feedback
                 search = search.ToLower();
                 query = query.Where(s =>
                     s.NameSuggestion.ToLower().Contains(search) ||
-                    s.DetailsSuggestion.ToLower().Contains(search) ||
-                    (s.ContactEmail != null && s.ContactEmail.ToLower().Contains(search)));
+                    s.DetailsSuggestion.ToLower().Contains(search));
             }
 
             if (isActive.HasValue)
             {
                 query = query.Where(s => s.IsActive == isActive.Value);
-            }
-
-            if (!string.IsNullOrWhiteSpace(status))
-            {
-                query = query.Where(s => s.Status == status);
             }
 
             var total = await query.CountAsync();
@@ -62,8 +55,6 @@ namespace Backend.Restaurant.Controllers.Registers.Feedback
                     Id = s.Id,
                     Name = s.NameSuggestion,
                     Details = s.DetailsSuggestion,
-                    ContactEmail = s.ContactEmail,
-                    Status = s.Status,
                     SuggestionDate = s.SuggestionDate,
                     IsActive = s.IsActive,
                     CreatedAt = s.CreatedAt,
@@ -95,8 +86,6 @@ namespace Backend.Restaurant.Controllers.Registers.Feedback
                 Id = suggestion.Id,
                 Name = suggestion.NameSuggestion,
                 Details = suggestion.DetailsSuggestion,
-                ContactEmail = suggestion.ContactEmail,
-                Status = suggestion.Status,
                 SuggestionDate = suggestion.SuggestionDate,
                 IsActive = suggestion.IsActive,
                 CreatedAt = suggestion.CreatedAt,
@@ -116,9 +105,7 @@ namespace Backend.Restaurant.Controllers.Registers.Feedback
             {
                 NameSuggestion = dto.Name,
                 DetailsSuggestion = dto.Details,
-                ContactEmail = dto.ContactEmail,
                 SuggestionDate = dto.SuggestionDate,
-                Status = "Pendiente",
                 IsActive = dto.IsActive,
                 CreatedAt = DateTime.UtcNow
             };
@@ -131,8 +118,6 @@ namespace Backend.Restaurant.Controllers.Registers.Feedback
                 Id = suggestion.Id,
                 Name = suggestion.NameSuggestion,
                 Details = suggestion.DetailsSuggestion,
-                ContactEmail = suggestion.ContactEmail,
-                Status = suggestion.Status,
                 SuggestionDate = suggestion.SuggestionDate,
                 IsActive = suggestion.IsActive,
                 CreatedAt = suggestion.CreatedAt,
@@ -157,8 +142,6 @@ namespace Backend.Restaurant.Controllers.Registers.Feedback
 
             suggestion.NameSuggestion = dto.Name;
             suggestion.DetailsSuggestion = dto.Details;
-            suggestion.ContactEmail = dto.ContactEmail;
-            suggestion.Status = dto.Status;
             suggestion.IsActive = dto.IsActive;
             suggestion.UpdatedAt = DateTime.UtcNow;
 
@@ -169,8 +152,6 @@ namespace Backend.Restaurant.Controllers.Registers.Feedback
                 Id = suggestion.Id,
                 Name = suggestion.NameSuggestion,
                 Details = suggestion.DetailsSuggestion,
-                ContactEmail = suggestion.ContactEmail,
-                Status = suggestion.Status,
                 SuggestionDate = suggestion.SuggestionDate,
                 IsActive = suggestion.IsActive,
                 CreatedAt = suggestion.CreatedAt,
@@ -214,37 +195,6 @@ namespace Backend.Restaurant.Controllers.Registers.Feedback
                 Id = suggestion.Id,
                 Name = suggestion.NameSuggestion,
                 Details = suggestion.DetailsSuggestion,
-                ContactEmail = suggestion.ContactEmail,
-                Status = suggestion.Status,
-                SuggestionDate = suggestion.SuggestionDate,
-                IsActive = suggestion.IsActive,
-                CreatedAt = suggestion.CreatedAt,
-                UpdatedAt = suggestion.UpdatedAt
-            });
-        }
-
-        [HttpPatch("{id}/status")]
-        public async Task<ActionResult<SuggestionResponseDto>> UpdateSuggestionStatus(int id, [FromBody] string status)
-        {
-            var suggestion = await _context.Suggestions.FindAsync(id);
-
-            if (suggestion == null)
-            {
-                return NotFound(new { message = "Sugerencia no encontrada" });
-            }
-
-            suggestion.Status = status;
-            suggestion.UpdatedAt = DateTime.UtcNow;
-
-            await _context.SaveChangesAsync();
-
-            return Ok(new SuggestionResponseDto
-            {
-                Id = suggestion.Id,
-                Name = suggestion.NameSuggestion,
-                Details = suggestion.DetailsSuggestion,
-                ContactEmail = suggestion.ContactEmail,
-                Status = suggestion.Status,
                 SuggestionDate = suggestion.SuggestionDate,
                 IsActive = suggestion.IsActive,
                 CreatedAt = suggestion.CreatedAt,

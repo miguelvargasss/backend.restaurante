@@ -14,12 +14,5 @@ namespace Backend.Restaurant.Models
 
         [Required(ErrorMessage = "La fecha de la sugerencia es requerida")]
         public DateTime SuggestionDate { get; set; } = DateTime.UtcNow;
-
-        [StringLength(20)]
-        public string Status { get; set; } = "Pendiente";
-
-        [EmailAddress(ErrorMessage = "Debe ser un correo electrónico válido")]
-        [StringLength(100)]
-        public string? ContactEmail { get; set; }
     }
 }

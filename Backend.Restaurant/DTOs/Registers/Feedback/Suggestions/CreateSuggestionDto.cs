@@ -12,10 +12,6 @@ namespace Backend.Restaurant.DTOs.Registers.Feedback.Suggestions
         [StringLength(500, ErrorMessage = "Los detalles no pueden exceder 500 caracteres")]
         public string Details { get; set; } = string.Empty;
 
-        [EmailAddress(ErrorMessage = "Debe ser un correo electrónico válido")]
-        [StringLength(100)]
-        public string? ContactEmail { get; set; }
-
         public DateTime SuggestionDate { get; set; } = DateTime.UtcNow;
 
         public bool IsActive { get; set; } = true;

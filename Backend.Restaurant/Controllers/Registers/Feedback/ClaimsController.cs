@@ -24,8 +24,7 @@ namespace Backend.Restaurant.Controllers.Registers.Feedback
             [FromQuery] int page = 1,
             [FromQuery] int pageSize = 10,
             [FromQuery] string? search = null,
-            [FromQuery] bool? isActive = null,
-            [FromQuery] string? status = null)
+            [FromQuery] bool? isActive = null)
         {
             if (page < 1) page = 1;
             if (pageSize < 1 || pageSize > 100) pageSize = 10;
@@ -37,19 +36,12 @@ namespace Backend.Restaurant.Controllers.Registers.Feedback
                 search = search.ToLower();
                 query = query.Where(c =>
                     c.NameClaim.ToLower().Contains(search) ||
-                    c.DetailClaim.ToLower().Contains(search) ||
-                    (c.ContactEmail != null && c.ContactEmail.ToLower().Contains(search)) ||
-                    (c.ContactPhone != null && c.ContactPhone.Contains(search)));
+                    c.DetailClaim.ToLower().Contains(search));
             }
 
             if (isActive.HasValue)
             {
                 query = query.Where(c => c.IsActive == isActive.Value);
-            }
-
-            if (!string.IsNullOrWhiteSpace(status))
-            {
-                query = query.Where(c => c.Status == status);
             }
 
             var total = await query.CountAsync();
@@ -63,9 +55,6 @@ namespace Backend.Restaurant.Controllers.Registers.Feedback
                     Id = c.Id,
                     Name = c.NameClaim,
                     Detail = c.DetailClaim,
-                    ContactEmail = c.ContactEmail,
-                    ContactPhone = c.ContactPhone,
-                    Status = c.Status,
                     ClaimDate = c.ClaimDate,
                     IsActive = c.IsActive,
                     CreatedAt = c.CreatedAt,
@@ -97,9 +86,6 @@ namespace Backend.Restaurant.Controllers.Registers.Feedback
                 Id = claim.Id,
                 Name = claim.NameClaim,
                 Detail = claim.DetailClaim,
-                ContactEmail = claim.ContactEmail,
-                ContactPhone = claim.ContactPhone,
-                Status = claim.Status,
                 ClaimDate = claim.ClaimDate,
                 IsActive = claim.IsActive,
                 CreatedAt = claim.CreatedAt,
@@ -119,10 +105,7 @@ namespace Backend.Restaurant.Controllers.Registers.Feedback
             {
                 NameClaim = dto.Name,
                 DetailClaim = dto.Detail,
-                ContactEmail = dto.ContactEmail,
-                ContactPhone = dto.ContactPhone,
                 ClaimDate = dto.ClaimDate,
-                Status = "Pendiente",
                 IsActive = dto.IsActive,
                 CreatedAt = DateTime.UtcNow
             };
@@ -135,9 +118,6 @@ namespace Backend.Restaurant.Controllers.Registers.Feedback
                 Id = claim.Id,
                 Name = claim.NameClaim,
                 Detail = claim.DetailClaim,
-                ContactEmail = claim.ContactEmail,
-                ContactPhone = claim.ContactPhone,
-                Status = claim.Status,
                 ClaimDate = claim.ClaimDate,
                 IsActive = claim.IsActive,
                 CreatedAt = claim.CreatedAt,
@@ -162,9 +142,6 @@ namespace Backend.Restaurant.Controllers.Registers.Feedback
 
             claim.NameClaim = dto.Name;
             claim.DetailClaim = dto.Detail;
-            claim.ContactEmail = dto.ContactEmail;
-            claim.ContactPhone = dto.ContactPhone;
-            claim.Status = dto.Status;
             claim.IsActive = dto.IsActive;
             claim.UpdatedAt = DateTime.UtcNow;
 
@@ -175,9 +152,6 @@ namespace Backend.Restaurant.Controllers.Registers.Feedback
                 Id = claim.Id,
                 Name = claim.NameClaim,
                 Detail = claim.DetailClaim,
-                ContactEmail = claim.ContactEmail,
-                ContactPhone = claim.ContactPhone,
-                Status = claim.Status,
                 ClaimDate = claim.ClaimDate,
                 IsActive = claim.IsActive,
                 CreatedAt = claim.CreatedAt,
@@ -221,39 +195,6 @@ namespace Backend.Restaurant.Controllers.Registers.Feedback
                 Id = claim.Id,
                 Name = claim.NameClaim,
                 Detail = claim.DetailClaim,
-                ContactEmail = claim.ContactEmail,
-                ContactPhone = claim.ContactPhone,
-                Status = claim.Status,
-                ClaimDate = claim.ClaimDate,
-                IsActive = claim.IsActive,
-                CreatedAt = claim.CreatedAt,
-                UpdatedAt = claim.UpdatedAt
-            });
-        }
-
-        [HttpPatch("{id}/status")]
-        public async Task<ActionResult<ClaimResponseDto>> UpdateClaimStatus(int id, [FromBody] string status)
-        {
-            var claim = await _context.Claims.FindAsync(id);
-
-            if (claim == null)
-            {
-                return NotFound(new { message = "Reclamo no encontrado" });
-            }
-
-            claim.Status = status;
-            claim.UpdatedAt = DateTime.UtcNow;
-
-            await _context.SaveChangesAsync();
-
-            return Ok(new ClaimResponseDto
-            {
-                Id = claim.Id,
-                Name = claim.NameClaim,
-                Detail = claim.DetailClaim,
-                ContactEmail = claim.ContactEmail,
-                ContactPhone = claim.ContactPhone,
-                Status = claim.Status,
                 ClaimDate = claim.ClaimDate,
                 IsActive = claim.IsActive,
                 CreatedAt = claim.CreatedAt,

@@ -14,17 +14,5 @@ namespace Backend.Restaurant.Models
 
         [Required(ErrorMessage = "La fecha del reclamo es requerida")]
         public DateTime ClaimDate { get; set; } = DateTime.UtcNow;
-
-        [Required(ErrorMessage = "El estado es requerido")]
-        [StringLength(20)]
-        public string Status { get; set; } = "Pendiente";
-
-        [EmailAddress(ErrorMessage = "Debe ser un correo electrónico válido")]
-        [StringLength(100)]
-        public string? ContactEmail { get; set; }
-
-        [Phone(ErrorMessage = "Debe ser un número de teléfono válido")]
-        [StringLength(9)]
-        public string? ContactPhone { get; set; }
     }
 }

@@ -1,4 +1,4 @@
-using Backend.Restaurant.Data;
+﻿using Backend.Restaurant.Data;
 using Backend.Restaurant.DTOs.Registers.Reserves;
 using Backend.Restaurant.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -52,12 +52,22 @@ namespace Backend.Restaurant.Controllers.Registers.Reserves
 
             if (startDate.HasValue)
             {
-                query = query.Where(r => r.ReservationDate >= startDate.Value);
+                // Convertir a UTC si no lo está
+                var startDateUtc = startDate.Value.Kind == DateTimeKind.Unspecified 
+                    ? DateTime.SpecifyKind(startDate.Value, DateTimeKind.Utc) 
+                    : startDate.Value.ToUniversalTime();
+                
+                query = query.Where(r => r.ReservationDate >= startDateUtc);
             }
 
             if (endDate.HasValue)
             {
-                query = query.Where(r => r.ReservationDate <= endDate.Value);
+                // ✅ Busca hasta las 23:59:59 del día seleccionado
+                var endDateUtc = endDate.Value.Kind == DateTimeKind.Unspecified 
+                    ? DateTime.SpecifyKind(endDate.Value.Date.AddDays(1).AddTicks(-1), DateTimeKind.Utc) 
+                    : endDate.Value.Date.AddDays(1).AddTicks(-1).ToUniversalTime();
+                
+                query = query.Where(r => r.ReservationDate <= endDateUtc);
             }
 
             var total = await query.CountAsync();

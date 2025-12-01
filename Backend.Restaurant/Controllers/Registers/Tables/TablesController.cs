@@ -58,7 +58,26 @@ namespace Backend.Restaurant.Controllers.Registers.Tables
                 .OrderBy(t => t.NameTable)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
-                .Select(t => new TableResponseDto
+                .ToListAsync();
+
+            // Obtener IDs de las mesas
+            var tableIds = tables.Select(t => t.Id).ToList();
+
+            // Obtener los pedidos activos de estas mesas en una sola consulta
+            var activeOrders = await _context.Orders
+                .Include(o => o.User)
+                .Where(o => tableIds.Contains(o.TableId.GetValueOrDefault()) && !o.IsPaid && o.Status != "Cancelada")
+                .ToListAsync();
+
+            // Mapear a DTO
+            var tableResponseDtos = tables.Select(t =>
+            {
+                var currentOrder = activeOrders
+                    .Where(o => o.TableId == t.Id)
+                    .OrderByDescending(o => o.OrderDate)
+                    .FirstOrDefault();
+
+                return new TableResponseDto
                 {
                     Id = t.Id,
                     Name = t.NameTable,
@@ -66,15 +85,34 @@ namespace Backend.Restaurant.Controllers.Registers.Tables
                     Capacity = t.Capacity,
                     IsActive = t.IsActive,
                     LoungeId = t.LoungeId,
-                    LoungeName = t.Lounge != null ? t.Lounge.NameLounge : null,
+                    LoungeName = t.Lounge?.NameLounge,
+                    
+                    // Campos de ocupación simplificados
+                    IsOccupied = currentOrder != null,
+                    OccupiedBy = currentOrder?.User?.NameUser,
+                    OccupiedByUserId = currentOrder?.UserId,
+                    CurrentOrderId = currentOrder?.Id,
+                    CurrentOrderStatus = currentOrder?.Status,
+                    CurrentOrderIsPaid = currentOrder?.IsPaid,
+                    
+                    // Información completa del pedido actual
+                    CurrentOrder = currentOrder != null ? new CurrentOrderDto
+                    {
+                        Id = currentOrder.Id,
+                        UserId = currentOrder.UserId,
+                        UserName = currentOrder.User?.NameUser,
+                        Status = currentOrder.Status,
+                        IsPaid = currentOrder.IsPaid
+                    } : null,
+                    
                     CreatedAt = t.CreatedAt,
                     UpdatedAt = t.UpdatedAt
-                })
-                .ToListAsync();
+                };
+            }).ToList();
 
             return Ok(new PaginatedTablesResponseDto
             {
-                Tables = tables,
+                Tables = tableResponseDtos,
                 Total = total,
                 Page = page,
                 PageSize = pageSize
@@ -104,12 +142,19 @@ namespace Backend.Restaurant.Controllers.Registers.Tables
         {
             var table = await _context.Tables
                 .Include(t => t.Lounge)
+                .Include(t => t.Orders.Where(o => !o.IsPaid && o.Status != "Cancelada"))
+                    .ThenInclude(o => o.User)
                 .FirstOrDefaultAsync(t => t.Id == id);
 
             if (table == null)
             {
                 return NotFound(new { message = "Mesa no encontrada" });
             }
+
+            var currentOrder = table.Orders?
+                .Where(o => !o.IsPaid && o.Status != "Cancelada")
+                .OrderByDescending(o => o.OrderDate)
+                .FirstOrDefault();
 
             return Ok(new TableResponseDto
             {
@@ -120,6 +165,24 @@ namespace Backend.Restaurant.Controllers.Registers.Tables
                 IsActive = table.IsActive,
                 LoungeId = table.LoungeId,
                 LoungeName = table.Lounge?.NameLounge,
+                
+                // ? Campos de ocupación
+                IsOccupied = currentOrder != null,
+                OccupiedBy = currentOrder?.User?.NameUser,
+                OccupiedByUserId = currentOrder?.UserId,
+                CurrentOrderId = currentOrder?.Id,
+                CurrentOrderStatus = currentOrder?.Status,
+                CurrentOrderIsPaid = currentOrder?.IsPaid,
+                
+                CurrentOrder = currentOrder != null ? new CurrentOrderDto
+                {
+                    Id = currentOrder.Id,
+                    UserId = currentOrder.UserId,
+                    UserName = currentOrder.User?.NameUser,
+                    Status = currentOrder.Status,
+                    IsPaid = currentOrder.IsPaid
+                } : null,
+                
                 CreatedAt = table.CreatedAt,
                 UpdatedAt = table.UpdatedAt
             });
@@ -171,6 +234,16 @@ namespace Backend.Restaurant.Controllers.Registers.Tables
                 IsActive = table.IsActive,
                 LoungeId = table.LoungeId,
                 LoungeName = table.Lounge?.NameLounge,
+                
+                // Nueva mesa no está ocupada
+                IsOccupied = false,
+                OccupiedBy = null,
+                OccupiedByUserId = null,
+                CurrentOrderId = null,
+                CurrentOrderStatus = null,
+                CurrentOrderIsPaid = null,
+                CurrentOrder = null,
+                
                 CreatedAt = table.CreatedAt,
                 UpdatedAt = table.UpdatedAt
             });
@@ -186,6 +259,8 @@ namespace Backend.Restaurant.Controllers.Registers.Tables
 
             var table = await _context.Tables
                 .Include(t => t.Lounge)
+                .Include(t => t.Orders.Where(o => !o.IsPaid && o.Status != "Cancelada"))
+                    .ThenInclude(o => o.User)
                 .FirstOrDefaultAsync(t => t.Id == id);
 
             if (table == null)
@@ -216,7 +291,10 @@ namespace Backend.Restaurant.Controllers.Registers.Tables
 
             await _context.SaveChangesAsync();
 
-            await _context.Entry(table).Reference(t => t.Lounge).LoadAsync();
+            var currentOrder = table.Orders?
+                .Where(o => !o.IsPaid && o.Status != "Cancelada")
+                .OrderByDescending(o => o.OrderDate)
+                .FirstOrDefault();
 
             return Ok(new TableResponseDto
             {
@@ -227,6 +305,24 @@ namespace Backend.Restaurant.Controllers.Registers.Tables
                 IsActive = table.IsActive,
                 LoungeId = table.LoungeId,
                 LoungeName = table.Lounge?.NameLounge,
+                
+                // ? Campos de ocupación
+                IsOccupied = currentOrder != null,
+                OccupiedBy = currentOrder?.User?.NameUser,
+                OccupiedByUserId = currentOrder?.UserId,
+                CurrentOrderId = currentOrder?.Id,
+                CurrentOrderStatus = currentOrder?.Status,
+                CurrentOrderIsPaid = currentOrder?.IsPaid,
+                
+                CurrentOrder = currentOrder != null ? new CurrentOrderDto
+                {
+                    Id = currentOrder.Id,
+                    UserId = currentOrder.UserId,
+                    UserName = currentOrder.User?.NameUser,
+                    Status = currentOrder.Status,
+                    IsPaid = currentOrder.IsPaid
+                } : null,
+                
                 CreatedAt = table.CreatedAt,
                 UpdatedAt = table.UpdatedAt
             });
@@ -265,6 +361,8 @@ namespace Backend.Restaurant.Controllers.Registers.Tables
         {
             var table = await _context.Tables
                 .Include(t => t.Lounge)
+                .Include(t => t.Orders.Where(o => !o.IsPaid && o.Status != "Cancelada"))
+                    .ThenInclude(o => o.User)
                 .FirstOrDefaultAsync(t => t.Id == id);
 
             if (table == null)
@@ -277,6 +375,11 @@ namespace Backend.Restaurant.Controllers.Registers.Tables
 
             await _context.SaveChangesAsync();
 
+            var currentOrder = table.Orders?
+                .Where(o => !o.IsPaid && o.Status != "Cancelada")
+                .OrderByDescending(o => o.OrderDate)
+                .FirstOrDefault();
+
             return Ok(new TableResponseDto
             {
                 Id = table.Id,
@@ -286,6 +389,24 @@ namespace Backend.Restaurant.Controllers.Registers.Tables
                 IsActive = table.IsActive,
                 LoungeId = table.LoungeId,
                 LoungeName = table.Lounge?.NameLounge,
+                
+                // ? Campos de ocupación
+                IsOccupied = currentOrder != null,
+                OccupiedBy = currentOrder?.User?.NameUser,
+                OccupiedByUserId = currentOrder?.UserId,
+                CurrentOrderId = currentOrder?.Id,
+                CurrentOrderStatus = currentOrder?.Status,
+                CurrentOrderIsPaid = currentOrder?.IsPaid,
+                
+                CurrentOrder = currentOrder != null ? new CurrentOrderDto
+                {
+                    Id = currentOrder.Id,
+                    UserId = currentOrder.UserId,
+                    UserName = currentOrder.User?.NameUser,
+                    Status = currentOrder.Status,
+                    IsPaid = currentOrder.IsPaid
+                } : null,
+                
                 CreatedAt = table.CreatedAt,
                 UpdatedAt = table.UpdatedAt
             });

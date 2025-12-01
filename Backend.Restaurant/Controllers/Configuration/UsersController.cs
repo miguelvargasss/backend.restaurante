@@ -285,7 +285,7 @@ namespace Backend.Restaurant.Controllers.Configuration
             user.IsActive = !user.IsActive;
             user.UpdatedAt = DateTime.UtcNow;
 
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync();  
 
             var response = new UserResponseDto
             {
